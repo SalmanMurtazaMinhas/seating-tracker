@@ -5,9 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
-    <title>Document</title>
+    <title>Seating Grid</title>
 </head>
 <body>
+
+    <!-- Top menu: manage multiple seating charts -->
+    <div class="menu">
+        <select id="classSelector"></select>
+
+        <input
+            id="classNameInput"
+            type="text"
+            placeholder="Enter class name (e.g. SEB-BH-7)"
+        >
+
+        <button id="saveClassBtn">Save Class</button>
+        <button id="newClassBtn">New Class</button>
+    </div>
+
+    <!-- Original seating grid -->
     <div class="grid-container">
         <div class="grid-section section-1">
             <div class="grid-item"><input type="text" value="" data-id="1-1"></div>
