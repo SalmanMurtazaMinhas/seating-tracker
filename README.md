@@ -86,7 +86,7 @@ Everything is stored locally — no backend required.
 ## **📦 Installation & Setup**
 
 👉 **Use it online (no installation needed):**
-**[https://your-deployed-url-here.com](https://your-deployed-url-here.com)**
+**[https://your-deployed-url-here.com]([https://your-deployed-url-here.com](https://salmanmurtazaminhas.github.io/seating-tracker/))**
 
 ---
 
