@@ -86,3 +86,37 @@ body {
 .ins {
     background-color: #c9c7c7;
 }
+
+#toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-5px);
+}
+
+.toast-success {
+    color: #4caf50;
+    font-weight: bold;
+}
+
+.toast-delete {
+    color: #ff5252;
+    font-weight: bold;
+}

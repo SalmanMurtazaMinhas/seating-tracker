@@ -1,13 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
     const inputs = document.querySelectorAll(".grid-item input");
 
-    const classSelector = document.getElementById("classSelector");
-    const classNameInput = document.getElementById("classNameInput");
-    const saveClassBtn = document.getElementById("saveClassBtn");
-    const newClassBtn = document.getElementById("newClassBtn");
+    const classSelector   = document.getElementById("classSelector");
+    const classNameInput  = document.getElementById("classNameInput");
+    const saveClassBtn    = document.getElementById("saveClassBtn");
+    const newClassBtn     = document.getElementById("newClassBtn");
+    const deleteClassBtn  = document.getElementById("deleteClassBtn");
 
-    // Use a different key name so it doesn't clash with your other app
     // gridClasses = { "SEB-BH-7": { "1-1": "Safa", ... }, ... }
+    // Separate key name so it doesn't clash with other apps
     let gridClasses = JSON.parse(localStorage.getItem("gridAllClasses")) || {};
     let currentClass = null;
 
@@ -16,7 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function clearInputs() {
-        inputs.forEach(input => (input.value = ""));
+        inputs.forEach(input => {
+            input.value = "";
+        });
     }
 
     function loadClass(className) {
@@ -24,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
             clearInputs();
             return;
         }
+
         const seatData = gridClasses[className];
         inputs.forEach(input => {
             const id = input.dataset.id;
@@ -45,11 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
             classSelector.value = currentClass;
         } else {
             const names = Object.keys(gridClasses);
-            if (names.length > 0) {
-                currentClass = names[0];
+            currentClass = names.length ? names[0] : null;
+            if (currentClass) {
                 classSelector.value = currentClass;
-            } else {
-                currentClass = null;
             }
         }
 
@@ -57,7 +59,29 @@ document.addEventListener("DOMContentLoaded", () => {
         loadClass(currentClass);
     }
 
-    // If no classes yet, create one default
+    // Toast helper
+    function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.innerHTML = `
+            <span class="${type === "success" ? "toast-success" : "toast-delete"}">
+                ${type === "success" ? "✔" : "✖"}
+            </span>
+            <span>${message}</span>
+        `;
+
+        toast.classList.add("show");
+
+        // clear previous timeout if still running
+        if (toast._timeoutId) {
+            clearTimeout(toast._timeoutId);
+        }
+
+        toast._timeoutId = setTimeout(() => {
+            toast.classList.remove("show");
+        }, 1800);
+    }
+
+    // Initialize default class if none exist
     if (Object.keys(gridClasses).length === 0) {
         currentClass = "Class 1";
         gridClasses[currentClass] = {};
@@ -68,15 +92,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderClassOptions();
 
-    // Save / rename current class with current seat values
+    // Save / rename current class
     saveClassBtn.addEventListener("click", () => {
         const name = classNameInput.value.trim();
-        if (!name) {
-            alert("Enter a class name first.");
-            return;
-        }
+        if (!name) return;
 
-        // collect seat data
         const seatData = {};
         inputs.forEach(input => {
             let val = input.value.trim();
@@ -94,7 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
         gridClasses[currentClass] = seatData;
         saveAllClasses();
         renderClassOptions();
-        alert("Class saved!");
+
+        showToast("Class saved", "success");
     });
 
     // Start a fresh unsaved seating chart
@@ -103,6 +124,30 @@ document.addEventListener("DOMContentLoaded", () => {
         classNameInput.value = "";
         classSelector.value = "";
         clearInputs();
+        showToast("New layout started", "success");
+    });
+
+    // Delete the currently selected class
+    deleteClassBtn.addEventListener("click", () => {
+        if (!currentClass) return;
+
+        delete gridClasses[currentClass];
+        saveAllClasses();
+
+        const remaining = Object.keys(gridClasses);
+
+        if (remaining.length === 0) {
+            currentClass = null;
+            classNameInput.value = "";
+            classSelector.innerHTML = "";
+            clearInputs();
+            showToast("Class deleted", "delete");
+            return;
+        }
+
+        currentClass = remaining[0];
+        renderClassOptions();
+        showToast("Class deleted", "delete");
     });
 
     // Change class from dropdown
@@ -112,10 +157,8 @@ document.addEventListener("DOMContentLoaded", () => {
         loadClass(currentClass);
     });
 
-    // Per-input behavior: select on focus, autosave on blur (if class selected)
+    // Inputs: select on focus, autosave on blur (for currentClass)
     inputs.forEach(input => {
-        const savedName = null; // not used now, loading happens via loadClass()
-
         input.addEventListener("focus", event => {
             event.target.select();
         });
@@ -127,11 +170,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 event.target.value = value;
             }
 
-            if (!currentClass) return; // only autosave if some class is active
+            if (!currentClass) return;
 
             if (!gridClasses[currentClass]) {
                 gridClasses[currentClass] = {};
             }
+
             gridClasses[currentClass][event.target.dataset.id] = value;
             saveAllClasses();
         });
